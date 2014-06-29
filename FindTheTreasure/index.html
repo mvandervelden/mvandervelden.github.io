@@ -1,0 +1,145 @@
+<html>
+<!-- Author:    Maarten van der Velden
+     contact:   maarten DOT vdvelden AT gmail DOT com
+     Last edit: Aug 3 2012 -->
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+<title>Find the Treasure in Google Street View</title>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script src="http://easywebsocket.org/easyWebSocket.min.js"></script>
+<script type="text/javascript" src='h5utils.js'></script>
+<script type-"text/javascript" src="scripts.js"></script>
+<!-- <script type-"text/javascript" src="fbscripts.js"></script> -->
+<script type-"text/javascript" src="socket.js"></script>
+<script type-"text/javascript" src="levels.js"></script>
+<script type-"text/javascript" src="gameunits.js"></script>
+
+<!-- TODO:  Menu (choose town, get town, settings)
+            How To / tutorial
+            HUD (compass, speedometer, local map?)
+            Custom panorama for treasure location?!
+            Facebook-app? (get location hometown, login)
+            multiplayer?
+            Artwork / layout
+            Advanced localization? (ip-based, check distance to SV, etc.)
+            look at problem situations/exceptions
+            -->
+<!-- Make the document body take up the full screen -->
+<style type="text/css">
+  v\:* {behavior:url(#default#VML);}
+  html, body {width: 100%; height: 100%}
+  body {margin: 0}
+  .box       {margin: auto; width: 270px; 
+              background: #fff; border-radius:20px;  padding: 20px; border:2px solid #ccc;
+              font-size: 25px; font-family: Helvetica,Arial,Verdana; text-align: center; }
+  .notice    {margin: auto; width: 270px; position: relative; top:40%;
+              background: #fff; border-radius:20px;  padding: 20px; border:2px solid #ccc;
+              font-size: 25px; font-family: Helvetica,Arial,Verdana; text-align: center; z-index:50; }
+  .menu-item {border:4px solid #ccc;font-size: 16px; text-align:left;}
+  .menu_message {font-size: 16px;}
+  .hudcl     {width: 100%; height: 10%; bottom: 0px; z-index: 50; border:2px solid #ccc;
+              font-family: Helvetica,Arial,Verdana; font-size: 24px;
+              background: #fff; position: fixed;}
+  .screen_txt{font-family: Helvetica,Arial,Verdana; font-size: 20px;
+              color:#FFFFFF; text-shadow:0px 0px 5px #000000;}
+</style>
+
+
+<script type="text/javascript">
+  // google.load("feeds", "1");
+  google.load("mootools","1.3.1");
+  google.load("maps","3",{'other_params': "sensor=false&libraries=geometry"});
+  google.setOnLoadCallback(initialize);
+  
+</script>
+</head>
+
+<body>
+  
+  <!-- <div id="fb-root"></div> -->
+
+
+<!--   <div class="fb-login-button" data-show-faces="true" data-width="200" data-max-rows="1"></div> -->
+
+    
+  <div style="position: fixed; top: 15px; left: 0; right: 0; border: none; z-index: 50;width: 100%">
+    <div id="text_box" class="box">
+      <div id="gamemenu">        
+        <span>Welcome to<br/>Find the Treasure!</span>
+        <div style="height:14px;"> </div>
+        <!-- Use the arrow keys to cycle through Amsterdam and find the treasure! -->
+        <span style="font-size: 17px">Menu</span>
+        <div id="tutorial" class="menu-item">Tutorial</div>
+        <!-- <div id="campaign" class="menu-item">Single player campaign</div> -->
+        <div id="freeplay" class="menu-item">Single player free play</div>
+        <div id="multiplay" class="menu-item">2-Player: Capture the Flag</div>
+        
+      </div>
+      <div style="height:35px;"> </div>
+      
+      <span style="font-size: 14px">Made in 2011-2012<br/>by Maarten van der Velden</span>
+      
+    </div>
+    <div id="disclaimer" class="box">
+      <span style="font-size: 20px">DISCLAIMER</span><br/>
+      <span style="font-size: 14px">This game is only tested in Google Chrome,
+        and is a work in progress, although a working one. When playing multi-player,
+        please send the url to your opponent after first going there yourself,
+        otherwise the game will not commence. Do not leave the website between
+        making and playing 2-player games, because game settings will not be stored.<br/>
+        More background of the game can be found <a href="report.pdf">here</a>.</span><br/>
+      <span style="font-size: 20px">HAVE FUN!</span>
+    </div>
+  </div>
+  
+  
+  
+  <!-- <div style="position: fixed; bottom: 15px; left: 0; right: 0; border: none; z-index: 40;width: 100%">
+    <div id="bottom_box" class="box" style='opacity:0'>
+      <span id="restart">Click here to try again<span/>
+    </div>
+  </div> -->
+  
+  <!-- <div id="hud" class="hudcl" style='opacity:0;'>
+    <div id="location_check" style"position:fixed; bottom: 40px; left: 10px;">
+      <span id="status">checking geoLocation...</span>
+      <span id="localizer"></span> 
+      
+      <span id="goalizer"></span>
+
+
+    </div>
+
+  </div> -->
+  <div style="height: 100%; width: 100%">
+    <div id="pano_canvas" style="height: 90%; width: 100%; ">
+      <div style="position: fixed; top: 15px; height: 10%; left: 0; right: 0; border: none; z-index: 40;width: 100%">
+        <div id="heat_box" class="box" style="padding:10px; position:fixed; left:0; right:0; top:1%; height:10%; z-index:50; opacity:0">
+          <div id="heatometer" style="position:relative; top:25%">
+            Starting...
+          </div>
+        </div>
+        <div id="compass_box" class="box" style="padding:10px; position:fixed; left:1%; top:1%; height:10%; width:10%;z-index:50; opacity:0">
+          <img id='cps_im' src="compass1.png" style="height: 100%; width:100%;" />
+        </div>
+        <div id="info_box" class="screen_txt" style="position:fixed; left:15%; top:3%; heigth: 10%; z-index:50; opacity:0">
+          <span id="compass-txt"></span> <br>
+          <span id="streetizer"></span><br>
+          <span id="distizer"></span>
+        </div>
+        <div id="map_box" class = 'box' style="padding:10px; position:fixed; left:79%; top:69%; height:16%; width:17%;z-index:50; opacity:0">
+          <div id="map_canvas" style="height:100%; width:100%;"></div>
+        </div>
+        <div id="speed_box" class = 'box' style="padding:10px; position:fixed; left:79%; top:1%; height:10%; width:12%;z-index:50; opacity:0">
+          <div id="speedometer" style="position:relative; top:25%"> km/h</div>
+        </div>
+      </div>
+    </div>
+    <div id="status_bar" class="hudcl" style="height: 10%; width: 100%">
+      <span id="status"></span>
+    </div>
+  </div>
+
+
+</body>
+</html>
