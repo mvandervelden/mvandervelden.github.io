@@ -1,0 +1,47 @@
+{
+    "activitycontinuation": {
+        "apps": [
+            "T5MJ2Y8557.nl.catawiki.bidder-app.internal"        ]
+    },
+    "applinks": {
+        "apps": [ ],
+        "details": [
+            {
+                "appID": "T5MJ2Y8557.nl.catawiki.bidder-app.internal",
+                "paths": [
+                    "/deeplink/nl/nl/*",
+                    "/deeplink/com/en/*",
+                    "/wf/click",
+                    "/uni/*",
+                    "/veiling/id/*",
+                    "/auction/id/*",
+                    "/lots/*",
+                    "/kavels/*",
+                    "/l/*",
+                    "/accounts/emails/*",
+                    "/accounts/register/*",
+                    "/a/t/*",
+                    "/a/th/*",
+                    "NOT /a/*/?*",
+                    "/a/?*",
+                    "NOT /s/*/?*",
+                    "/s/*",
+                    "NOT /c/*/?*",
+                    "/c/?*",
+                    "/optiext/optiextension.dll*",
+                    "/veiling/favorites",
+                    "/buyer/orders/*",
+                    "/orders/unpaid/*",
+                    "/seller/overview",
+                    "/accounts/settings/account",
+                    "/accounts/passwords/reset/*"
+                ]
+            }
+        ]
+    },
+    "webcredentials":{
+        "apps":[
+            "T5MJ2Y8557.nl.catawiki.bidder-app.internal"
+        ]
+    }
+}
